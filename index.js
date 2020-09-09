@@ -18,6 +18,8 @@ function onLoad() {
     if ($app) return
     $app = {
         hierarchy: {},
+        log: [],
+        logDiv: null,
     }
 
     function scanObject(blockNode, name, obj, maxDepth, callback) {
@@ -109,6 +111,9 @@ function onLoad() {
     var listDivNode = null
     innerDivNode
         //.createChildElement('input', { type: 'button', })
+        .createChildElement('h1', { innerText: 'log' })
+        .createChildElement('div', null, function (div) { $app.logDiv = div })
+        .createChildElement('hr')
         .createChildElement('h1', {
             innerText: 'window',
             onclick: function () {
@@ -125,7 +130,7 @@ function onLoad() {
                 var n = name.substring(name.lastIndexOf('.') + 1)
                 rootObjects[n] = obj
             } else {
-                console.log('ignore ' + name + ' : ' + type + '(' + objectType + ')')
+                $app.log.push('ignore ' + name + ' : ' + type + '(' + objectType + ')')
             }
         } else {
             scanCallback(_this, name, obj, type, objectType, $app.hierarchy['window'])
@@ -147,7 +152,7 @@ function onLoad() {
             scanCallback(_this, name, obj, type, objectType, $app.hierarchy[k])
             var n = name.substring(name.lastIndexOf('.') + 1)
             if (type === 'object' && objectType != null && (objectType === 'Window' || (objectType === 'Location' && _this.depth > 0) || objectType.match(/^HTML[A-Z][a-z]+Element$/))) {
-                console.log('ignore ' + name + ' : ' + type + '(' + objectType + ') and children')
+                $app.log.push('ignore ' + name + ' : ' + type + '(' + objectType + ') and children')
                 return false
             }
             return true
@@ -157,6 +162,14 @@ function onLoad() {
     document.getElementById('body')
         //.createChildElement('p', { innerText: JSON.stringify($app.hierarchy) })
         .appendChild(innerDivNode)
+
+    for (var i = 0; i < $app.log.length; i++) {
+        var log = $app.log[i]
+        console.log(log)
+        $app.logDiv
+            .createChildElement('span', { innerText: log })
+            .createChildElement('br')
+    }
 }
 
 document.addEventListener('DOMContentLoaded', function () { onLoad() }, false)
